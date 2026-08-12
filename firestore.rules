@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper to check if the user is an admin
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'admin@dataai.com' || 
+        request.auth.token.email == 'mokshithgowda329@gmail.com' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // User activity logs
+    match /activities/{activityId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+  }
+}

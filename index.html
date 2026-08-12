@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataAI - Intelligent Data Analytics & Dashboards</title>
+  <meta name="description" content="Transform raw datasets into visually stunning dashboards with automated AI statistical insights, linear regressions, anomaly detections, and SQL query consoles entirely in your browser.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- JS CDNs (PapaParse, XLSX, Chart.js, Confetti, Lucide) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+
+  <!-- Animated Backdrop Glow Blobs -->
+  <div class="bg-blobs">
+    <div class="blob blob-purple"></div>
+    <div class="blob blob-cyan"></div>
+  </div>
+
+  <!-- Main View Router Container -->
+  <div class="app-container">
+
+    <!-- 1. LANDING & UPLOAD VIEW -->
+    <div id="landingView" class="landing-view">
+      <header class="landing-header">
+        <h1 class="landing-title">DataAI</h1>
+        <p class="landing-subtitle">
+          Frosted glassmorphism dashboards, automated statistical highlights, outlier detection, trend forecasts, and SQL consoles. Upload a dataset or try sample data to begin.
+        </p>
+      </header>
+
+      <main class="upload-container">
+        <div id="dropZone" class="drop-zone">
+          <div class="upload-icon">
+            <!-- Inline Upload SVG icon in case CDN delays -->
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3>Drag and drop your file here</h3>
+          <p>Supports .CSV, .XLSX, .JSON, .SQL formats</p>
+          <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls,.json,.sql">
+        </div>
+
+        <div id="uploadProgressLog" class="progress-log"></div>
+
+        <div class="file-specs">
+          <span class="file-badge">CSV Parsing</span>
+          <span class="file-badge">Excel SheetJS</span>
+          <span class="file-badge">JSON Array</span>
+          <span class="file-badge">SQL Inserts</span>
+        </div>
+
+        <div class="demo-section">
+          <span>Don't have a dataset? Try one of ours:</span>
+          <div class="demo-buttons">
+            <button id="demoSalesBtn" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Global Sales Demo
+            </button>
+            <button id="demoHealthBtn" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              Fitness Tracker Demo
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 2. DASHBOARD WORKSPACE VIEW (Hidden initially) -->
+    <div id="workspaceView" class="workspace-view hidden">
+      
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">D</div>
+          <span class="brand-name">DataAI</span>
+        </div>
+
+        <ul class="nav-menu">
+          <li>
+            <a href="#" class="nav-link active" data-tab="overview">
+              <i data-lucide="layout-dashboard"></i> Overview
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-tab="visualizations">
+              <i data-lucide="line-chart"></i> Visualizations
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-tab="analytics">
+              <i data-lucide="trending-up"></i> Predictions & Skew
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-tab="sql">
+              <i data-lucide="database"></i> SQL Workspace
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-tab="dataviewer">
+              <i data-lucide="table"></i> Data Viewer
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-link" data-tab="chat">
+              <i data-lucide="message-square"></i> AI Assistant
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <div class="dataset-badge">
+            <div class="status-dot"></div>
+            <div class="dataset-meta">
+              <span id="loadedFilename">dataset.csv</span>
+              <small>Client-Side Cache</small>
+            </div>
+          </div>
+          
+          <a href="#" class="nav-link" data-tab="settings" style="margin-top:0.25rem;">
+            <i data-lucide="settings"></i> Settings
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Workspace Panels -->
+      <main class="main-content scrollbar-custom">
+        
+        <!-- Header -->
+        <header class="workspace-header">
+          <div>
+            <h1 id="activeWorkspaceTitle">DataAI Dashboard</h1>
+            <p style="color: var(--text-secondary); margin-top:0.25rem;">In-browser cognitive compiler & statistical metrics</p>
+          </div>
+          <div class="header-actions">
+            <button id="themeToggleBtn" class="btn btn-secondary btn-icon" title="Toggle Theme">
+              <i class="lucide-moon"></i>
+            </button>
+            <button id="exportPdfReportBtn" class="btn btn-primary">
+              <i data-lucide="file-text"></i> Export PDF
+            </button>
+          </div>
+        </header>
+
+        <!-- A. OVERVIEW PANEL -->
+        <div id="overviewTab" class="tab-panel">
+          <!-- KPI Metrics Row -->
+          <div class="grid-container grid-cols-4">
+            <div class="glass-card kpi-card">
+              <div class="kpi-icon"><i data-lucide="rows"></i></div>
+              <div class="kpi-data">
+                <span class="label">Total Records</span>
+                <span id="kpiTotalRows" class="value">0</span>
+                <span class="subtext success-text">100% processed</span>
+              </div>
+            </div>
+            
+            <div class="glass-card kpi-card">
+              <div class="kpi-icon"><i data-lucide="columns"></i></div>
+              <div class="kpi-data">
+                <span class="label">Variables</span>
+                <span id="kpiColumns" class="value">0</span>
+                <span class="subtext">Auto Schema mapped</span>
+              </div>
+            </div>
+
+            <div class="glass-card kpi-card">
+              <div class="kpi-icon"><i data-lucide="alert-triangle"></i></div>
+              <div class="kpi-data">
+                <span class="label">Outliers Flagged</span>
+                <span id="kpiAnomalies" class="value">0</span>
+                <span id="kpiAnomaliesSub" class="subtext">Data within standard limits</span>
+              </div>
+            </div>
+
+            <div class="glass-card kpi-card">
+              <div class="kpi-icon"><i data-lucide="percent"></i></div>
+              <div class="kpi-data">
+                <span id="kpiPrimaryLabel" class="label">Average Value</span>
+                <span id="kpiPrimaryAvg" class="value">0</span>
+                <span class="subtext">Numeric indices</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Summary Cards -->
+          <div class="grid-container grid-cols-2">
+            <div class="glass-card">
+              <h2 style="font-family: var(--font-header); margin-bottom: 1.25rem; font-size:1.4rem;">💡 AI Narrative Summary</h2>
+              <div id="narrativeSummaryContainer" class="narrative-insight-panel">
+                <p>Analyzing datasets...</p>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h2 style="font-family: var(--font-header); margin-bottom: 1.25rem; font-size:1.4rem;">📐 Attribute Mappings & Cardinality</h2>
+              <div class="table-container scrollbar-custom" style="max-height: 380px;">
+                <table id="overviewSchemaTable">
+                  <thead>
+                    <tr>
+                      <th>Column Name</th>
+                      <th>Type</th>
+                      <th>Unique Counts</th>
+                      <th>Nulls %</th>
+                      <th>Sample Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- B. VISUALIZATIONS PANEL -->
+        <div id="visualizationsTab" class="tab-panel hidden">
+          <div class="glass-card">
+            <h2 style="font-family: var(--font-header); margin-bottom: 1.25rem; font-size:1.4rem;">📈 Interactive Visualizer</h2>
+            
+            <div class="chart-controls-panel">
+              <div class="form-group">
+                <label for="chartXSelect">X-Axis Column</label>
+                <select id="chartXSelect" class="select-control"></select>
+              </div>
+              <div class="form-group">
+                <label for="chartYSelect">Y-Axis Column (Value)</label>
+                <select id="chartYSelect" class="select-control"></select>
+              </div>
+              <div class="form-group">
+                <label for="chartTypeSelect">Chart Type</label>
+                <select id="chartTypeSelect" class="select-control">
+                  <option value="line">Line Chart (Smooth)</option>
+                  <option value="area">Area Chart</option>
+                  <option value="bar">Bar Chart</option>
+                  <option value="doughnut">Doughnut Chart</option>
+                  <option value="radar">Radar Chart</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="chartPaletteSelect">Color Theme</label>
+                <select id="chartPaletteSelect" class="select-control">
+                  <option value="cyberpunk">Cyberpunk Glow (Purple/Cyan)</option>
+                  <option value="sunset">Sunset Gradient (Rose/Orange)</option>
+                  <option value="emerald">Forest Moss (Green/Teal)</option>
+                  <option value="oceanic">Deep Sea (Blue/Mint)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="chart-wrapper">
+              <canvas id="workspaceChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- C. ADVANCED ANALYTICS (PREDICTIONS & ANOMALIES) -->
+        <div id="analyticsTab" class="tab-panel hidden">
+          <div class="grid-container grid-cols-2">
+            <!-- Linear Regression and forecast panel -->
+            <div class="glass-card" style="display:flex; flex-direction:column; gap:1.25rem;">
+              <h2 style="font-family: var(--font-header); font-size:1.4rem;">🔮 Predictive Modeling (Linear Regression)</h2>
+              
+              <div class="chart-controls-panel" style="padding:1rem; gap:1rem;">
+                <div class="form-group" style="flex:1;">
+                  <label for="predictXSelect">Independent X (Index / Date)</label>
+                  <select id="predictXSelect" class="select-control" style="width:100%;"></select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label for="predictYSelect">Dependent Y (Numeric Value)</label>
+                  <select id="predictYSelect" class="select-control" style="width:100%;"></select>
+                </div>
+                <div class="form-group" style="width:80px;">
+                  <label for="forecastSteps">Steps</label>
+                  <input type="number" id="forecastSteps" class="input-control" value="5" min="1" max="30" style="width:100%;">
+                </div>
+              </div>
+
+              <div id="regressionCoefficients" style="display:flex; gap:1rem; flex-wrap:wrap;">
+                <!-- Coefficients dynamic cards -->
+              </div>
+
+              <div class="chart-wrapper" style="height:280px;">
+                <canvas id="analyticsChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Outliers and Forecast Data Grid -->
+            <div class="glass-card" style="display:flex; flex-direction:column; gap:1.25rem;">
+              <h2 style="font-family: var(--font-header); font-size:1.4rem;">📋 Model Projection Matrix</h2>
+              
+              <div class="table-container scrollbar-custom" style="flex:1; max-height: 400px;">
+                <table id="forecastTable">
+                  <thead>
+                    <tr>
+                      <th>Forecast Axis (X)</th>
+                      <th>Expected Value (Y)</th>
+                      <th>Reliability Interval</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-muted);">
+                *Forecasts are fitted using least-squares linear modeling. Confidence depends on the coefficient of determination (R²).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- D. SQL WORKSPACE -->
+        <div id="sqlTab" class="tab-panel hidden">
+          <div class="sql-workspace-grid">
+            
+            <!-- Side Schema Map -->
+            <div class="glass-card">
+              <h3 style="font-family: var(--font-header); margin-bottom:1rem; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="table-properties" style="color:var(--neon-cyan)"></i> Schema Map</h3>
+              <div class="table-container scrollbar-custom" style="border:none;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Column</th>
+                      <th>Data Type</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sqlSchemaBody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Center Console editor -->
+            <div class="sql-editor-card">
+              <div class="glass-card" style="display:flex; flex-direction:column; gap:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <h3 style="font-family: var(--font-header); font-size:1.15rem;">💻 SQL Shell Sandbox</h3>
+                  <button id="runSQLBtn" class="btn btn-primary">
+                    <i data-lucide="play"></i> Run Query
+                  </button>
+                </div>
+                
+                <textarea id="sqlTextarea" class="sql-textarea" placeholder="-- Try standard queries like:&#10;SELECT Category, SUM(Sales), AVG(Profit) FROM data GROUP BY Category ORDER BY SUM(Sales) DESC LIMIT 10;"></textarea>
+                
+                <div id="sqlConsoleLog" class="console-log info">
+                  System ready. Write SQL queries against the active dataset alias 'data' or 'dataset'.
+                </div>
+              </div>
+
+              <!-- Output Workspace results -->
+              <div class="glass-card">
+                <h3 style="font-family: var(--font-header); margin-bottom:1rem; font-size:1.15rem;">📊 Query Outputs</h3>
+                <div id="sqlResultsTable" style="max-height: 280px; overflow-y:auto;" class="scrollbar-custom">
+                  <div style="color:var(--text-muted); text-align:center; padding:2rem 0;">Run a SQL command to view compiled tabular outputs.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- E. DATA VIEWER PANEL -->
+        <div id="dataviewerTab" class="tab-panel hidden">
+          <div class="glass-card">
+            <div class="data-grid-header">
+              <div style="display:flex; gap:1rem; align-items:center;">
+                <h2 style="font-family: var(--font-header); font-size:1.4rem;">📋 Tabular Dataset Explorer</h2>
+                <button id="downloadCsvBtn" class="btn btn-secondary">
+                  <i data-lucide="download"></i> Download CSV
+                </button>
+              </div>
+              
+              <div class="form-group" style="width: 250px;">
+                <input type="text" id="gridSearchInput" class="input-control" placeholder="Search tables...">
+              </div>
+            </div>
+
+            <!-- Tabular View container -->
+            <div id="dataGridContainer" class="table-container scrollbar-custom" style="max-height: 480px;">
+              <!-- Dynamic table -->
+            </div>
+
+            <!-- Table Pagination bottom layout -->
+            <div id="gridPagination" class="grid-pagination-panel">
+              <!-- Dynamic -->
+            </div>
+          </div>
+        </div>
+
+        <!-- F. AI ASSISTANT CHAT PANEL -->
+        <div id="chatTab" class="tab-panel hidden">
+          <div class="chat-workspace">
+            <div id="chatLogs" class="chat-logs scrollbar-custom">
+              <!-- Dynamically populated bubble lists -->
+            </div>
+            
+            <div class="chat-input-bar">
+              <div class="chat-suggestions">
+                <span class="chat-chip">Summarize key anomalies</span>
+                <span class="chat-chip">Show columns correlations</span>
+                <span class="chat-chip">Average of sales</span>
+                <span class="chat-chip">Is there a trend?</span>
+              </div>
+              <div class="chat-controls">
+                <input type="text" id="chatInput" class="input-control chat-input" placeholder="Ask details about your dataset (e.g., 'What product had the highest volume?')...">
+                <button id="sendChatBtn" class="btn btn-primary">
+                  <i data-lucide="send"></i> Ask AI
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- G. SETTINGS PANEL -->
+        <div id="settingsTab" class="tab-panel hidden">
+          <div class="glass-card" style="max-width:600px; margin: 0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+            <h2 style="font-family: var(--font-header); font-size:1.4rem; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem;">⚙️ Settings Panel</h2>
+            
+            <div class="form-group">
+              <label for="geminiApiKeyInput">Google Gemini API Key (Optional)</label>
+              <input type="password" id="geminiApiKeyInput" class="input-control" placeholder="AIzaSy...">
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
+                Providing a Gemini API key enables real-time large language reasoning directly inside the AI Assistant tab. Your key is stored securely in your local browser cache (localStorage) and is only sent directly to Google API endpoints.
+              </p>
+            </div>
+
+            <button id="saveSettingsBtn" class="btn btn-primary" style="align-self:flex-start;">
+              Save API Configuration
+            </button>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Loading scripts sequentially -->
+  <script src="js/sampleData.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/sqlEngine.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/tests.js"></script>
+
+  <!-- Lucide icons trigger init -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+
+    // Hook tab switches to recreate Lucide icons
+    const originalSwitchTab = window.DataUI.switchTab;
+    window.DataUI.switchTab = function(tabId) {
+      originalSwitchTab.call(window.DataUI, tabId);
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    };
+  </script>
+</body>
+</html>

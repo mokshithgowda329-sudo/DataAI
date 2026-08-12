@@ -1,0 +1,20 @@
+{
+  "collections": {
+    "users": {
+      "schema": {
+        "email": "string",
+        "role": "string",
+        "createdAt": "timestamp"
+      }
+    },
+    "activities": {
+      "schema": {
+        "userId": "string",
+        "userEmail": "string",
+        "actionType": "string",
+        "details": "string",
+        "timestamp": "timestamp"
+      }
+    }
+  }
+}

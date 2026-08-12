@@ -1,0 +1,6 @@
+{
+  "name": "DataAI",
+  "description": "An advanced data visualization and predictive analytics platform with a Power BI-style dashboard, interactive chart customization, forecasting, local and server-side Gemini AI analysis, and robust user activity logging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
